@@ -1,12 +1,12 @@
 package com.example.backend.auth.controller;
 
+import com.example.backend.auth.dto.user.UpdateProfileRequest;
 import com.example.backend.auth.dto.user.UserProfileResponse;
 import com.example.backend.auth.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,6 +24,15 @@ public class UserController {
 
         return ResponseEntity.ok(
                 userService.getCurrentUser()
+        );
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserProfileResponse> updateCurrentUser(
+            @Valid @RequestBody UpdateProfileRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.updateCurrentUser(request)
         );
     }
 }

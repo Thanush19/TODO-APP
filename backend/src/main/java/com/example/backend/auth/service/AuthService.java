@@ -1,19 +1,20 @@
 package com.example.backend.auth.service;
 
-import com.example.backend.auth.dto.LoginRequest;
-import com.example.backend.auth.dto.LoginResponse;
-import com.example.backend.auth.dto.RegisterRequest;
-import com.example.backend.auth.dto.RegisterResponse;
+import com.example.backend.auth.dto.*;
 import com.example.backend.auth.entity.User;
 import com.example.backend.auth.exception.InvalidCredentialsException;
 import com.example.backend.auth.repository.UserRepository;
 import com.example.backend.common.exception.EmailAlreadyRegisteredException;
 import com.example.backend.common.security.JwtTokenService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -31,6 +32,9 @@ public class AuthService {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
@@ -62,7 +66,7 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     public LoginResponse login(LoginRequest request) {
 
         String email = normalizeEmail(request.getEmail());
@@ -84,8 +88,11 @@ public class AuthService {
                 user.getEmail()
         );
 
+        String refreshToken = refreshTokenService.createRefreshToken(user);
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .expiresIn(jwtTokenService.getAccessTokenExpiration())
                 .user(

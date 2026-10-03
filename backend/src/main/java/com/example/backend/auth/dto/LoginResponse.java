@@ -17,6 +17,7 @@ public class LoginResponse {
     private String tokenType;
     private long expiresIn;
     private UserInfo user;
+    private String refreshToken;
 
     @Getter
     @Builder

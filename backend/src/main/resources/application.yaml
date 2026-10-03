@@ -39,4 +39,6 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.todoapp: DEBUG
+    com.example.backend: DEBUG
+    org.flywaydb: DEBUG
+    org.springframework.boot.autoconfigure.flyway: DEBUG

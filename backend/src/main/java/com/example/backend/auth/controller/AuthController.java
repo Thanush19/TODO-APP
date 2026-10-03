@@ -1,5 +1,7 @@
 package com.example.backend.auth.controller;
 
+import com.example.backend.auth.dto.LoginRequest;
+import com.example.backend.auth.dto.LoginResponse;
 import com.example.backend.auth.dto.RegisterRequest;
 import com.example.backend.auth.dto.RegisterResponse;
 import com.example.backend.auth.service.AuthService;
@@ -20,11 +22,19 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request
     ) {
-
         RegisterResponse response = authService.register(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        LoginResponse response = authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }

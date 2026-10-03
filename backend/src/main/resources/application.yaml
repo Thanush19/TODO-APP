@@ -42,3 +42,9 @@ logging:
     com.example.backend: DEBUG
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
+
+app:
+  security:
+    jwt:
+      secret: "7f3c9a2e8b1d6f4a9c7e2b5d8a1f6c3e9d2b7a5f8c4e1d6"
+      access-token-expiration: 900000

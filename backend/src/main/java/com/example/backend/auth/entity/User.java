@@ -1,6 +1,7 @@
 package com.example.backend.auth.entity;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -46,4 +47,9 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    public void updateName(String name) {
+        this.name = name;
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
 }

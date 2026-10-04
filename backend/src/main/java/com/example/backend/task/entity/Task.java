@@ -1,6 +1,7 @@
 package com.example.backend.task.entity;
 
 import com.example.backend.auth.entity.User;
+import com.example.backend.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,10 @@ import java.util.UUID;
                 @Index(
                         name = "idx_tasks_user_id_created_at",
                         columnList = "user_id, created_at"
+                ),
+                @Index(
+                        name = "idx_tasks_category_id",
+                        columnList = "category_id"
                 )
         }
 )
@@ -35,6 +40,13 @@ public class Task {
             foreignKey = @ForeignKey(name = "fk_tasks_user")
     )
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "category_id",
+            foreignKey = @ForeignKey(name = "fk_tasks_category")
+    )
+    private Category category;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -62,12 +74,14 @@ public class Task {
             String title,
             String description,
             TaskPriority priority,
-            OffsetDateTime dueAt
+            OffsetDateTime dueAt,
+            Category category
     ) {
         this.title = title;
         this.description = description;
         this.priority = priority;
         this.dueAt = dueAt;
+        this.category = category;
         this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
 

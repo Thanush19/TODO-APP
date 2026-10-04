@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -24,4 +25,6 @@ public class CreateTaskRequest {
     private TaskPriority priority;
 
     private OffsetDateTime dueAt;
+
+    private UUID categoryId;
 }

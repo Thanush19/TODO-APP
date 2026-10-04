@@ -18,6 +18,7 @@ public class TaskResponse {
     private boolean completed;
     private TaskPriority priority;
     private OffsetDateTime dueAt;
+    private TaskCategoryResponse category;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -29,6 +30,9 @@ public class TaskResponse {
                 task.isCompleted(),
                 task.getPriority(),
                 task.getDueAt(),
+                task.getCategory() != null
+                        ? TaskCategoryResponse.from(task.getCategory())
+                        : null,
                 task.getCreatedAt(),
                 task.getUpdatedAt()
         );

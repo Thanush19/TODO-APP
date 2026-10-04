@@ -2,6 +2,9 @@ package com.example.backend.task.service;
 
 import com.example.backend.auth.entity.User;
 import com.example.backend.auth.repository.UserRepository;
+import com.example.backend.category.entity.Category;
+import com.example.backend.category.entity.CategoryType;
+import com.example.backend.category.repository.CategoryRepository;
 import com.example.backend.task.dto.CreateTaskRequest;
 import com.example.backend.task.dto.TaskResponse;
 import com.example.backend.task.dto.UpdateTaskCompletionRequest;
@@ -26,6 +29,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     public TaskResponse createTask(
             UUID userId,
@@ -33,9 +37,15 @@ public class TaskService {
     ) {
         User user = getUser(userId);
 
+        Category category = getAccessibleCategory(
+                userId,
+                request.getCategoryId()
+        );
+
         Task task = Task.builder()
                 .id(UUID.randomUUID())
                 .user(user)
+                .category(category)
                 .title(request.getTitle().trim())
                 .description(request.getDescription())
                 .completed(false)
@@ -81,13 +91,19 @@ public class TaskService {
     ) {
         Task task = getUserTask(userId, taskId);
 
+        Category category = getAccessibleCategory(
+                userId,
+                request.getCategoryId()
+        );
+
         task.update(
                 request.getTitle().trim(),
                 request.getDescription(),
                 request.getPriority() != null
                         ? request.getPriority()
                         : TaskPriority.MEDIUM,
-                request.getDueAt()
+                request.getDueAt(),
+                category
         );
 
         return TaskResponse.from(task);
@@ -112,6 +128,27 @@ public class TaskService {
         Task task = getUserTask(userId, taskId);
 
         taskRepository.delete(task);
+    }
+
+    private Category getAccessibleCategory(
+            UUID userId,
+            UUID categoryId
+    ) {
+        if (categoryId == null) {
+            return null;
+        }
+
+        return categoryRepository
+                .findByIdAndType(categoryId, CategoryType.SYSTEM)
+                .orElseGet(() ->
+                        categoryRepository
+                                .findByIdAndUserId(categoryId, userId)
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException(
+                                                "Category not found"
+                                        )
+                                )
+                );
     }
 
     private User getUser(UUID userId) {

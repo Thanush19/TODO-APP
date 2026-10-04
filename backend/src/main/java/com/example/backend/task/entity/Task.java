@@ -2,11 +2,14 @@ package com.example.backend.task.entity;
 
 import com.example.backend.auth.entity.User;
 import com.example.backend.category.entity.Category;
+import com.example.backend.tag.entity.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -48,6 +51,21 @@ public class Task {
     )
     private Category category;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "task_tags",
+            joinColumns = @JoinColumn(
+                    name = "task_id",
+                    foreignKey = @ForeignKey(name = "fk_task_tags_task")
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "tag_id",
+                    foreignKey = @ForeignKey(name = "fk_task_tags_tag")
+            )
+    )
+    @Builder.Default
+    private Set<Tag> tags = new HashSet<>();
+
     @Column(nullable = false, length = 200)
     private String title;
 
@@ -87,6 +105,12 @@ public class Task {
 
     public void updateCompletion(boolean completed) {
         this.completed = completed;
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    public void updateTags(Set<Tag> tags) {
+        this.tags.clear();
+        this.tags.addAll(tags);
         this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
 }

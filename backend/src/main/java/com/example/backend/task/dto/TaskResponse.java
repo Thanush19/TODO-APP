@@ -1,11 +1,13 @@
 package com.example.backend.task.dto;
 
+import com.example.backend.tag.dto.TagResponse;
 import com.example.backend.task.entity.Task;
 import com.example.backend.task.entity.TaskPriority;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -19,6 +21,7 @@ public class TaskResponse {
     private TaskPriority priority;
     private OffsetDateTime dueAt;
     private TaskCategoryResponse category;
+    private List<TagResponse> tags;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -33,6 +36,10 @@ public class TaskResponse {
                 task.getCategory() != null
                         ? TaskCategoryResponse.from(task.getCategory())
                         : null,
+                task.getTags()
+                        .stream()
+                        .map(TagResponse::from)
+                        .toList(),
                 task.getCreatedAt(),
                 task.getUpdatedAt()
         );

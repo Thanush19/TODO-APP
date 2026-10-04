@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -27,4 +28,5 @@ public class UpdateTaskRequest {
     private OffsetDateTime dueAt;
 
     private UUID categoryId;
+    private Set<UUID> tagIds;
 }

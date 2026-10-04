@@ -5,6 +5,8 @@ import com.example.backend.auth.repository.UserRepository;
 import com.example.backend.category.entity.Category;
 import com.example.backend.category.entity.CategoryType;
 import com.example.backend.category.repository.CategoryRepository;
+import com.example.backend.tag.entity.Tag;
+import com.example.backend.tag.repository.TagRepository;
 import com.example.backend.task.dto.CreateTaskRequest;
 import com.example.backend.task.dto.TaskResponse;
 import com.example.backend.task.dto.UpdateTaskCompletionRequest;
@@ -19,7 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -30,6 +35,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
 
     public TaskResponse createTask(
             UUID userId,
@@ -42,10 +48,16 @@ public class TaskService {
                 request.getCategoryId()
         );
 
+        Set<Tag> tags = getAccessibleTags(
+                userId,
+                request.getTagIds()
+        );
+
         Task task = Task.builder()
                 .id(UUID.randomUUID())
                 .user(user)
                 .category(category)
+                .tags(tags)
                 .title(request.getTitle().trim())
                 .description(request.getDescription())
                 .completed(false)
@@ -96,6 +108,11 @@ public class TaskService {
                 request.getCategoryId()
         );
 
+        Set<Tag> tags = getAccessibleTags(
+                userId,
+                request.getTagIds()
+        );
+
         task.update(
                 request.getTitle().trim(),
                 request.getDescription(),
@@ -105,6 +122,8 @@ public class TaskService {
                 request.getDueAt(),
                 category
         );
+
+        task.updateTags(tags);
 
         return TaskResponse.from(task);
     }
@@ -149,6 +168,26 @@ public class TaskService {
                                         )
                                 )
                 );
+    }
+
+    private Set<Tag> getAccessibleTags(
+            UUID userId,
+            Set<UUID> tagIds
+    ) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        List<Tag> tags = tagRepository.findAllByIdInAndUserId(
+                tagIds,
+                userId
+        );
+
+        if (tags.size() != tagIds.size()) {
+            throw new EntityNotFoundException("Tag not found");
+        }
+
+        return new HashSet<>(tags);
     }
 
     private User getUser(UUID userId) {

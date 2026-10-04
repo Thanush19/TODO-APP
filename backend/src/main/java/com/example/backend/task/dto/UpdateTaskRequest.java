@@ -28,5 +28,8 @@ public class UpdateTaskRequest {
     private OffsetDateTime dueAt;
 
     private UUID categoryId;
+
     private Set<UUID> tagIds;
+
+    private UUID parentTaskId;
 }

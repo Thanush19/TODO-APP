@@ -22,6 +22,7 @@ public class TaskResponse {
     private OffsetDateTime dueAt;
     private TaskCategoryResponse category;
     private List<TagResponse> tags;
+    private UUID parentTaskId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -40,6 +41,9 @@ public class TaskResponse {
                         .stream()
                         .map(TagResponse::from)
                         .toList(),
+                task.getParentTask() != null
+                        ? task.getParentTask().getId()
+                        : null,
                 task.getCreatedAt(),
                 task.getUpdatedAt()
         );

@@ -24,6 +24,10 @@ import java.util.UUID;
                 @Index(
                         name = "idx_tasks_category_id",
                         columnList = "category_id"
+                ),
+                @Index(
+                        name = "idx_tasks_parent_task_id",
+                        columnList = "parent_task_id"
                 )
         }
 )
@@ -50,6 +54,13 @@ public class Task {
             foreignKey = @ForeignKey(name = "fk_tasks_category")
     )
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_task_id",
+            foreignKey = @ForeignKey(name = "fk_tasks_parent_task")
+    )
+    private Task parentTask;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -111,6 +122,11 @@ public class Task {
     public void updateTags(Set<Tag> tags) {
         this.tags.clear();
         this.tags.addAll(tags);
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    public void updateParentTask(Task parentTask) {
+        this.parentTask = parentTask;
         this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
 }

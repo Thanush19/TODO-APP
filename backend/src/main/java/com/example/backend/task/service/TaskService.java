@@ -14,14 +14,14 @@ import com.example.backend.task.dto.UpdateTaskRequest;
 import com.example.backend.task.entity.Task;
 import com.example.backend.task.entity.TaskPriority;
 import com.example.backend.task.repository.TaskRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.backend.common.exception.EntityNotFoundException;
+import com.example.backend.common.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,10 +53,18 @@ public class TaskService {
                 request.getTagIds()
         );
 
+        Task parentTask = getAccessibleParentTask(
+                userId,
+                request.getParentTaskId()
+        );
+
+        validateParentTask(parentTask);
+
         Task task = Task.builder()
                 .id(UUID.randomUUID())
                 .user(user)
                 .category(category)
+                .parentTask(parentTask)
                 .tags(tags)
                 .title(request.getTitle().trim())
                 .description(request.getDescription())
@@ -113,6 +121,13 @@ public class TaskService {
                 request.getTagIds()
         );
 
+        Task parentTask = getAccessibleParentTask(
+                userId,
+                request.getParentTaskId()
+        );
+
+        validateParentTask(task, parentTask);
+
         task.update(
                 request.getTitle().trim(),
                 request.getDescription(),
@@ -124,6 +139,7 @@ public class TaskService {
         );
 
         task.updateTags(tags);
+        task.updateParentTask(parentTask);
 
         return TaskResponse.from(task);
     }
@@ -188,6 +204,52 @@ public class TaskService {
         }
 
         return new HashSet<>(tags);
+    }
+
+    private Task getAccessibleParentTask(
+            UUID userId,
+            UUID parentTaskId
+    ) {
+        if (parentTaskId == null) {
+            return null;
+        }
+
+        return taskRepository
+                .findByIdAndUserId(parentTaskId, userId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Parent task not found"
+                        )
+                );
+    }
+
+    private void validateParentTask(Task parentTask) {
+        if (parentTask == null) {
+            return;
+        }
+
+        if (parentTask.getParentTask() != null) {
+            throw new ConflictException(
+                    "Nested subtasks are not allowed"
+            );
+        }
+    }
+
+    private void validateParentTask(
+            Task task,
+            Task parentTask
+    ) {
+        if (parentTask == null) {
+            return;
+        }
+
+        if (task.getId().equals(parentTask.getId())) {
+            throw new ConflictException(
+                    "A task cannot be its own parent"
+            );
+        }
+
+        validateParentTask(parentTask);
     }
 
     private User getUser(UUID userId) {

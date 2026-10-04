@@ -29,5 +29,6 @@ public class CreateTaskRequest {
 
     private UUID categoryId;
     private Set<UUID> tagIds;
+    private UUID parentTaskId;
 
 }

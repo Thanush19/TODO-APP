@@ -52,4 +52,9 @@ public class User {
         this.name = name;
         this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
+
+    public void updatePassword(String encodedPassword) {
+        this.passwordHash = encodedPassword;
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
 }

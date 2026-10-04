@@ -21,7 +21,6 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getCurrentUser() {
-
         return ResponseEntity.ok(
                 userService.getCurrentUser()
         );
